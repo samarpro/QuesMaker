@@ -1,0 +1,4 @@
+{
+    "output.smartScroll.enabled": false,
+    "python.analysis.typeCheckingMode": "off"
+}
