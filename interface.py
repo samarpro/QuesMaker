@@ -1,5 +1,5 @@
 # for infopage
-from main import inPathSendable, outPathSendable
+# from main import inPathSendableObj, outPathSendable,inPathSendableSub,typeQ
 from docx import Document
 from pathlib import Path
 from os import path
@@ -12,9 +12,15 @@ from random import sample
 OUTPUT_PATH = Path(__file__).parent
 ASSETS_PATH = OUTPUT_PATH / Path(rf"{OUTPUT_PATH}\assets\frame0")
 
+
+# temp code
+outPathSendable = "OutDoc.doc"
+inPathSendableObj = "C:/Users/LENOVO/OneDrive/Desktop/QuesLong..docx"
+inPathSendableSub="path of subjective"
+typeQ = 0
 # Universally used stuffs
 letters = ["A", "B", "C", "D", "E"]
-InDoc = Document(inPathSendable)
+InDoc = Document(inPathSendableObj)
 noPara = len(InDoc.paragraphs)
 noOfQuestFound = noPara//5
 # getting system Metrices
@@ -34,15 +40,15 @@ def pathSelect(no):
     # 1 equivalents to searching for a file
     # else searching for a folder
     if no == 1:
-        global inPathSendable, outPathSendable
+        global inPathSendableObj, outPathSendable
         try:
             # for file selection
             path = filedialog.askopenfile().name
             # this is done to change the value of Input foolder path when user decides to change the previous file
-            inPathSendable = path
+            inPathSendableObj = path
             # redefining instance of Document class
             global InDoc
-            InDoc = Document(inPathSendable)
+            InDoc = Document(inPathSendableObj)
             # lenght of the path string
             LenPath = len(path)-1
             # converting text to lowercase for validation and checking wheather the input file is input is or not
@@ -148,7 +154,7 @@ window.configure(bg="#363740")
 canvas = Canvas(
     window,
     bg="#363740",
-    height=700,
+    height=620,
     width=1000,
     bd=0,
     highlightthickness=0,
@@ -157,13 +163,14 @@ canvas = Canvas(
 
 canvas.place(x=0, y=0)
 canvas.create_rectangle(
-    185.0,
-    55.0,
+    195.0,
+    15.0,
     794.0,
     658.0,
     fill="#FFFFFF",
     outline="")
 
+# Generate Button
 button_image_1 = PhotoImage(
     file=relative_to_assets("button_1.png"))
 button_1 = Button(
@@ -171,49 +178,22 @@ button_1 = Button(
     borderwidth=0,
     highlightthickness=0,
     command=lambda: PROCESSOR(
-        inPathSendable, outPathSendable, NO_QUESTION.get(), NO_PAPER_REQUIRED.get()),
+        inPathSendableObj, outPathSendable, NO_QUESTION.get(), NO_PAPER_REQUIRED.get()),
     relief="flat"
 )
 button_1.place(
     x=437.0,
-    y=505.0,
+    y=555.0,
     width=126.0,
     height=48.0
 )
+# //////////////////////////////////////////////////////
 
 
-path_picker_img = PhotoImage(file=ASSETS_PATH / "path_picker.png")
-path_picker_button = Button(
-    image=path_picker_img,
-    text='',
-    compound='center',
-    fg='white',
-    borderwidth=0,
-    highlightthickness=0,
-    command=lambda: pathSelect(1),
-    relief='flat')
-path_picker_button.place(
-    x=420, y=299,
-    width=24,
-    height=22)
 
-path_picker_img2 = PhotoImage(file=ASSETS_PATH / "path_picker.png")
-path_picker_button2 = Button(
-    image=path_picker_img2,
-    text='',
-    compound='center',
-    fg='white',
-    borderwidth=0,
-    highlightthickness=0,
-    # executes when button is clicked
-    command=lambda: pathSelect(2),
-    relief='flat')
-path_picker_button2.place(
-    x=420, y=400,
-    width=24,
-    height=22)
 
-# entry 1 -> input file directory
+
+# entry 1 -> input file directory Objective
 entry_image_1 = PhotoImage(
     file=relative_to_assets("entry_1.png"))
 entry_bg_1 = canvas.create_image(
@@ -230,29 +210,62 @@ entry_1 = Entry(
 )
 entry_1.place(
     x=247.0,
-    y=293.0,
+    y=253.0,
     width=150.0,
     height=35.0
 )
-entry_1.insert(0, inPathSendable)
+entry_1.insert(0, inPathSendableObj)
 entry_1.xview_moveto(1)
-# canvas.create_text(
-#     248.0,
-#     301.0,
-#     anchor="nw",
-#     text="File Path Goes Here",
-#     fill="#4A4F6C",
-#     font=("Muli Regular", 14 * -1)
-# )
+
+path_picker_img = PhotoImage(file=ASSETS_PATH / "path_picker.png")
+path_picker_button = Button(
+    image=path_picker_img,
+    text='',
+    compound='center',
+    fg='white',
+    borderwidth=0,
+    highlightthickness=0,
+    command=lambda: pathSelect(1),
+    relief='flat')
+path_picker_button.place(
+    x=420, y=259,
+    width=24,
+    height=22)
 
 canvas.create_text(
     239.0,
     265.0,
     anchor="nw",
-    text="INPUT DIRECTORY",
+    text="INPUT DIRECTORY (OBJECTIVE)",
     fill="#565863",
     font=("Mulish Bold", 12 * -1)
 )
+
+# entry 3 -> input file directory for Subjective Question
+entry_image_3 = PhotoImage(
+    file=relative_to_assets("entry_1.png"))
+entry_bg_3 = canvas.create_image(
+    348.0,
+    311.0,
+    image=entry_image_3
+)
+entry_3 = Entry(
+    bd=0,
+    bg="#FCFDFE",
+    fg="#000716",
+    highlightthickness=0,
+
+)
+entry_3.place(
+    x=247.0,
+    y=293.0,
+    width=150.0,
+    height=35.0
+)
+entry_3.insert(0, inPathSendableObj)
+entry_3.xview_moveto(1)
+
+
 
 # entry_2 -> output directory
 entry_image_2 = PhotoImage(
@@ -276,6 +289,23 @@ entry_2.place(
 )
 entry_2.insert(0, outPathSendable)
 entry_2.xview_moveto(1)
+
+path_picker_img2 = PhotoImage(file=ASSETS_PATH / "path_picker.png")
+path_picker_button2 = Button(
+    image=path_picker_img2,
+    text='',
+    compound='center',
+    fg='white',
+    borderwidth=0,
+    highlightthickness=0,
+    # executes when button is clicked
+    command=lambda: pathSelect(2),
+    relief='flat')
+path_picker_button2.place(
+    x=420, y=400,
+    width=24,
+    height=22)
+# /////////////////////////////////////////////////////////
 
 # entry_3->
 entry_image_3 = PhotoImage(
@@ -316,7 +346,14 @@ canvas.create_text(
     fill="#44454C",
     font=("Mulish Bold", 12 * -1)
 )
-
+# canvas.create_text(
+#     528.0,
+#     100.0,
+#     anchor="nw",
+#     text="No of papers to be generated",
+#     fill="#4A4F6C",
+#     font=("Muli Regular", 14 * -1)
+# )
 # canvas.create_text(
 #     28.0,
 #     403.0,
@@ -356,15 +393,8 @@ canvas.create_text(
     font=("Mulish Bold", 12 * -1)
 )
 
-canvas.create_text(
-    528.0,
-    403.0,
-    anchor="nw",
-    text="No of papers to be generated",
-    fill="#4A4F6C",
-    font=("Muli Regular", 14 * -1)
-)
 
+# Logo
 canvas.create_text(
     288.0,
     80.0,
@@ -373,7 +403,7 @@ canvas.create_text(
     fill="#A4A6B3",
     font=("Mulish Bold", 19 * -1)
 )
-
+# Image for logo of dequestify
 image_image_1 = PhotoImage(
     file=relative_to_assets("image_1.png"))
 image_1 = canvas.create_image(
@@ -382,24 +412,27 @@ image_1 = canvas.create_image(
     image=image_image_1
 )
 
+# Admin Access Text--
 canvas.create_text(
     410.0,
-    164.0,
+    124.0,
     anchor="nw",
     text="Admin Access",
     fill="#252733",
     font=("Mulish Bold", 24 * -1)
 )
+# Question Found Box-------
 canvas.create_rectangle(
-    417.0,
-    219.0,
+    407.0,
+    169.0,
     575.0,
-    259.0,
+    209.0,
     fill="#00B2FF",
     outline="")
+# Question found Text
 chanagable = canvas.create_text(
     427.0,
-    228.0,
+    178.0,
     tags="notext",
     anchor="nw",
     text=f"Question Found :{len(InDoc.paragraphs)//5}",
