@@ -188,11 +188,6 @@ button_1.place(
     height=48.0
 )
 # //////////////////////////////////////////////////////
-
-
-
-
-
 # entry 1 -> input file directory Objective
 entry_image_1 = PhotoImage(
     file=relative_to_assets("entry_1.png"))
