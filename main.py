@@ -42,7 +42,7 @@ def pathSelect(no):
         except:
             mg.showerror("Error", "Input File is not selected.")
             entry_1.insert(0, "")
-    elif no==3:
+    elif no==3: # When user selects input subjective
         try:
             path = filedialog.askopenfile().name
             # lenght of the path string
@@ -52,18 +52,17 @@ def pathSelect(no):
                 mg.showerror("File Selection Error",
                              "The file you selected is not a word file.")
                 return
-            entry_1.delete(0, END)
-            entry_1.insert(0, path)
+            entry_3.delete(0, END)
+            entry_3.insert(0, path)
             inPathSendableSub = path
-
         except:
             mg.showerror("Error", "Input File is not selected.")
-            entry_1.insert(0, "")
+            entry_3.insert(0, "")
         
     else:
         path = filedialog.askdirectory()
-        entry_2.delete(0, END)
-        entry_2.insert(0, path)
+        OutEntry.delete(0, END)
+        OutEntry.insert(0, path)
         outPathSendable = path
 
 
@@ -74,7 +73,7 @@ def onClickSub():
     global inPathSendableObj,inPathSendableSub,typeQ
     OptionVarText = OptionVar.get()
     if OptionVarText =="Objective":
-        typeQ = 1
+        typeQ = 'Objective'
         if (inPathSendableObj == "" and TempInpLocObj.get()==""):
             mg.showerror("Directory Path Error",
                         f"Path of {OptionVarText} file must be provided.")
@@ -83,7 +82,7 @@ def onClickSub():
             inPathSendableObj=TempInpLocObj.get()
 
     elif OptionVarText=="Subjective":
-        typeQ=2
+        typeQ='Subjective'
         if (inPathSendableSub == "" and TempInpLocSub.get()==""):
             mg.showerror("Directory Path Error",
                         f"Path of {OptionVarText} file must be provided.")
@@ -91,7 +90,7 @@ def onClickSub():
         else:
             inPathSendableSub =TempInpLocSub.get()
     elif OptionVarText=="Subjective and Objective":
-        typeQ=3
+        typeQ= 'Subjective and Objective'
         if (inPathSendableObj == "" and TempInpLocObj.get()=="" and inPathSendableSub == "" and TempInpLocSub.get()==""):
             mg.showerror("Directory Path Error",
                         f"Path of {OptionVarText} file must be provided.")
@@ -197,14 +196,6 @@ canvas.create_text(
 )
 # <000000000000000000000000000
 # Input File Directory for MCQ question
-canvas.create_text(
-    561.0,
-    242.0,
-    anchor="nw",
-    text="Input File Directory (Objective)",
-    fill="#0A779A",
-    font=("Inter ExtraBold", 19 * -1)
-)
 button_image_1 = PhotoImage(
     file=relative_to_assets("Inbutton_1.png"))
 button_1 = Button(
@@ -235,12 +226,12 @@ path_picker_button.place(
     x=840, y=275,
     width=24,
     height=22)
-# For Input Long Question---
+# CODE BLOCK STARTS INPUT OBJECTIVE
 canvas.create_text(
     561.0,
-    315.0,
+    242.0,
     anchor="nw",
-    text="Input File Directory (Subjective)",
+    text="Input File Directory (Objective)",
     fill="#0A779A",
     font=("Inter ExtraBold", 19 * -1)
 )
@@ -264,7 +255,17 @@ entry_1.place(
     width=258.0,
     height=28.5
 )
-# for input Long Question
+# CODE BLOCK ENDS INPUT OBJECTIVE
+# CODE BLOCK STARTS INPUT SUBJECTIVE
+# For Input Long Question---
+canvas.create_text(
+    561.0,
+    315.0,
+    anchor="nw",
+    text="Input File Directory (Subjective)",
+    fill="#0A779A",
+    font=("Inter ExtraBold", 19 * -1)
+)
 entry_image_3 = PhotoImage(
     file=relative_to_assets("Inentry_2.png"))
 entry_bg_3 = canvas.create_image(
@@ -277,7 +278,7 @@ entry_3 = Entry(
     bg="#FFFFFF",
     fg="#000716",
     highlightthickness=0,
-    textvariable=inPathSendableSub
+    textvariable=TempInpLocSub
 )
 entry_3.place(
     x=565.0,
@@ -299,8 +300,7 @@ path_picker_button3.place(
     x=840, y=356,
     width=24,
     height=22)
-
-
+# CODE BLOCK ENDS FOR INPUT SUBJECTIVE
 # for output file----
 canvas.create_text(
     561.0,
@@ -310,20 +310,20 @@ canvas.create_text(
     fill="#0A779A",
     font=("Inter ExtraBold", 19 * -1)
 )
-entry_image_2 = PhotoImage(
+OutEntryImg = PhotoImage(
     file=relative_to_assets("Inentry_2.png"))
-entry_bg_2 = canvas.create_image(
+OutEntryBG = canvas.create_image(
     693.5,
     435.5,
-    image=entry_image_2
+    image=OutEntryImg
 )
-entry_2 = Entry(
+OutEntry = Entry(
     bd=0,
     bg="#FFFFFF",
     fg="#000716",
     highlightthickness=0,
 )
-entry_2.place(
+OutEntry.place(
     x=565.0,
     y=421.8,
     width=258.0,
@@ -345,7 +345,7 @@ path_picker_button2.place(
     width=24,
     height=22)
 
-choices = ['Subjective', 'Objective', 'Subjective and Objective']
+choices = ('Subjective', 'Objective', 'Subjective and Objective')
 OptionVar.set('Type of Question to be Generated - Any One')
 # for selecting option
 w = Combobox(window, values = choices,textvariable= OptionVar)

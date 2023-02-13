@@ -1,12 +1,14 @@
 # for infopage
-# from main import inPathSendableObj, outPathSendable,inPathSendableSub,typeQ
+from main import inPathSendableObj, outPathSendable, inPathSendableSub, typeQ
 from docx import Document
 from pathlib import Path
 from os import path
 from win32api import GetSystemMetrics
 # from tkinter import *
 # Explicit imports to satisfy Flake8
-from tkinter import Tk, Canvas, Entry, IntVar, Button, PhotoImage, filedialog, END, messagebox as mg,Label
+from tkinter import Tk, Canvas, Entry, IntVar, Button, PhotoImage, END, messagebox as mg, StringVar
+from tkinter.ttk import Combobox
+from tkinter.filedialog import askdirectory, askopenfile
 from random import sample
 # completed importing stuffs.
 OUTPUT_PATH = Path(__file__).parent
@@ -14,19 +16,48 @@ ASSETS_PATH = OUTPUT_PATH / Path(rf"{OUTPUT_PATH}\assets\frame0")
 
 
 # temp code
-outPathSendable = "OutDoc.doc"
-inPathSendableObj = "C:/Users/LENOVO/OneDrive/Desktop/QuesLong..docx"
-inPathSendableSub="path of subjective"
-typeQ = 0
-# Universally used stuffs
+# outPathSendable = "OutDoc.doc"
+# inPathSendableObj = "C:/Users/LENOVO/OneDrive/Desktop/QuesLong..docx"
+# inPathSendableSub = "C:/Users/LENOVO/OneDrive/Desktop/QuesLong..docx"
+# typeQ ="Subjective"
+# Universally used 
+
+class Dummy():
+    
+    paragraphs = "N" 
+    def __init__(self) -> None:
+        pass
+    def add_paragraph(self,text):
+        pass
+    def add_heading(self,text):
+        pass
+
 letters = ["A", "B", "C", "D", "E"]
-InDoc = Document(inPathSendableObj)
-noPara = len(InDoc.paragraphs)
-noOfQuestFound = noPara//5
+try:
+    if typeQ=="Objective":
+        InDocObj = Document(inPathSendableObj)
+        InDocSub = Dummy()
+    elif typeQ=="Subjective":
+        InDocObj = Dummy()
+        InDocSub = Document(inPathSendableSub)
+    else:
+        InDocObj = Document(inPathSendableObj)
+        InDocSub = Document(inPathSendableSub)
+
+    noPara_ObjFile = len(InDocObj.paragraphs)
+    noPara_SubFile = len(InDocSub.paragraphs)
+except Exception as e:
+    mg.showerror("Path Error Ocurred", "Please Restart the Application.")
+    quit()
+noOfQuestFound_ObjFile = noPara_ObjFile//5
+noOfQuestFound_SubFile = noPara_SubFile
+OutDoc = None
 # getting system Metrices
 width = GetSystemMetrics(0)
 height = GetSystemMetrics(1)
 
+# for making graph more imaginable
+Y_CONST = 200
 # returns a relative path of files
 
 
@@ -39,16 +70,12 @@ def relative_to_assets(path: str) -> Path:
 def pathSelect(no):
     # 1 equivalents to searching for a file
     # else searching for a folder
-    if no == 1:
-        global inPathSendableObj, outPathSendable
+    if no == 1 or no == 2:
+        global inPathSendableObj, inPathSendableSub, outPathSendable
         try:
+            # getting the file path as entered picked by user
             # for file selection
-            path = filedialog.askopenfile().name
-            # this is done to change the value of Input foolder path when user decides to change the previous file
-            inPathSendableObj = path
-            # redefining instance of Document class
-            global InDoc
-            InDoc = Document(inPathSendableObj)
+            path = askopenfile().name
             # lenght of the path string
             LenPath = len(path)-1
             # converting text to lowercase for validation and checking wheather the input file is input is or not
@@ -56,24 +83,51 @@ def pathSelect(no):
                 mg.showerror("File Selection Error",
                              "The file you selected is not a word file.")
                 return
-            entry_1.delete(0, END)
-            entry_1.insert(0, path)
-            canvas.itemconfig(
-                chanagable, text=f"Question Found: {len(InDoc.paragraphs)//5}")
-            # moves the cursor to right most part
-            entry_1.xview_moveto(1)
+            # this is done to change the value of Input folder path when user decides to change the previous file
+            global InDocObj, InDocSub, noPara_ObjFile, noPara_SubFile, noOfQuestFound_SubFile, noOfQuestFound_ObjFile
+            try:
+                if no == 1:
+                    inPathSendableObj = path
+                    # redefining instance of Document class
+                    InDocObj = Document(inPathSendableObj)
+                    ObjFileSec.delete(0, END)
+                    ObjFileSec.insert(0, path)
+                    ObjFileSec.xview_moveto(1)
+                    canvas.itemconfig(
+                        changable1, text=f"Question Found: {len(InDocObj.paragraphs)//5}")
+                    # Redefining the varaible that depends on the InDocObj
+                    noPara_ObjFile = len(InDocObj.paragraphs)
+                    noOfQuestFound_ObjFile = noPara_ObjFile//5
 
+                else:
+                    inPathSendableSub = path
+                    # redefining instance of Document class
+                    global InDocSub
+                    InDocSub = Document(inPathSendableSub)
+                    SubFileSec.delete(0, END)
+                    SubFileSec.insert(0, path)
+                    SubFileSec.xview_moveto(1)
+                    canvas.itemconfig(
+                        changable2, text=f"Question Found: {len(InDocSub.paragraphs)}")
+                    # Redefining the variable that depends on InDocSub
+                    noPara_SubFile = len(InDocSub.paragraphs)
+                    noOfQuestFound_SubFile = noPara_SubFile
+            except:
+                mg.showerror(
+                    "OCCURRENCE OF ERROR", "Please check the Path provided or Re-Start the Program.")
+            # moves the cursor to right most part
+        # Global exception handler
         except Exception as e:
-            print(e)
             mg.showerror("Error", "Input File is not selected.")
-            entry_1.insert(0, "")
+            ObjFileSec.insert(0, "")
     else:
-        path = filedialog.askdirectory()
+        # For output path selection
+        path = askdirectory()
         outPathSendable = path
         # deletes what's already their
-        entry_2.delete(0, END)
-        entry_2.insert(0, path)
-        entry_2.xview_moveto(1)
+        OutEntry.delete(0, END)
+        OutEntry.insert(0, path)
+        OutEntry.xview_moveto(1)
 
 # this function randomizes the option in question set
 
@@ -85,72 +139,133 @@ def optionRandomizer(OutDoc, paraNum):
     # since no of option is always 4
     for index, val in enumerate(default_list):
         # text to be appended in OutDoc
-        reqText = f"{letters[index]}) {InDoc.paragraphs[paraNum+val].text}"
+        reqText = f"{letters[index]}) {InDocObj.paragraphs[paraNum+val if (paraNum+val)<noOfQuestFound_ObjFile*5 else paraNum].text}"
         OutDoc.add_paragraph(reqText)
 
+# this code creates random question for subjective question
+
+
+def SUB_QUES(NoOfQues):
+    ques_pos_list = None
+    """
+    This function generates random question for subjective question set
+    """
+    ques_pos_list = sample(range(0, noPara_SubFile),
+                           NoOfQues)  # NO_QUESTION_SUB
+    for counter, ranNo in enumerate(ques_pos_list):
+        # ranNo is the random number
+        # Getting text from input file
+        paraCode = InDocSub.paragraphs[ranNo]
+        # getting the actual code
+        InpQues = paraCode.text
+        # copying that text into new file
+        OutDoc.add_paragraph(f"{counter+1}) {InpQues}")
+
+
+def OBJ_QUES(NoOfQues):
+    ques_pos_list = None
+    # list which acts as a template for question fetching
+    ques_pos_list = sample(range(0, noPara_ObjFile, 5), NoOfQues)
+    for counter, ranNo in enumerate(ques_pos_list):
+        # ranNo is the random number
+        # Getting text from input file
+        paraCode = InDocObj.paragraphs[ranNo]
+        InpQues = paraCode.text
+        # copying that text into new file
+        OutDoc.add_paragraph(f"{counter+1}) {InpQues}")
+        # function to randomize options
+        optionRandomizer(OutDoc, ranNo)
 
 # -----------------------------------------------------------------
 # function which does the main processing
 
+
 def PROCESSOR(*args):
-    ques_pos_list = None
     """
         Basic Parameters Structure:
-        0 - input file
-        1-output file
-        2-no of required question
-        3-no of papers required
+        0 - input File Objective
+        1-output File
+        2-no of required question Objective
+        3-no of required question Subjective
+        4-no of Papers required
+        5-input File Subjective
     """
-    
+    global typeQ, OutDoc  # type of  question user required
+    typeQ = OPTION_VAR.get()
 
- # Getting no of paragraphs
-    global noPara
-    noPara = len(InDoc.paragraphs)
-    if any(arg == "" or arg == 0 for arg in args):
-        mg.showerror("Text Field Blank Error",
-                     "Required Information must be provided.")
+    # Getting no of paragraphs
+    global noPara_ObjFile, noPara_SubFile
+    if args[4]==0:
+        mg.showerror("NO CREATION ERROR",
+                            "Number of Paper is 0.Must be Greater than 0.")
         return
-    if args[2] > (noPara//5):
-        mg.showerror("Question Deficit Error",
-                     "Question deficiency in Input file")
-        return
-
-    # actual len of Paragraphs
-    actNoPara = (noPara//5)*5
     # papNo -> No of paper required
-    for papNo in range(args[3]):
+    for papNo in range(args[4]):
         # creates new instances which creates new file
         OutDoc = Document()
-        # list which acts as a template for question fetching
-        ques_pos_list = sample(range(0, actNoPara, 5), args[2])
-        for counter, ranNo in enumerate(ques_pos_list):
-            # ranNo is the random number
-            # Getting text from input file
-            paraCode = InDoc.paragraphs[ranNo]
-            InpQues = paraCode.text
-            # copying that text into new file
-            OutDoc.add_paragraph(f"{counter+1}) {InpQues}")
-            # function to randomize options
-            optionRandomizer(OutDoc, ranNo)
+        # checking the type of type user wants
+        if typeQ == "Subjective":
+            # doesn't check when the index in 3 ie doesn't check the objective wheather it is zero or not 
+            if any(arg == "" or arg == 0 for ind,arg in enumerate(args) if ind!=2 and ind!=0):
+                mg.showerror("Text Field Blank Error",
+                            "Please Enter no of Subjective Question required.")
+                return
+            # code below adds subjective question to file
+            if args[3] > (noOfQuestFound_SubFile):  
+                mg.showerror("Question Deficit Error",
+                            "Number of Question required exceeded Number of Question provided.")
+                return
+            OutDoc.add_heading(f"Answer the following Question", 2)
+            SUB_QUES(NO_QUESTION_SUB.get())
+        # When Subjective only
+        elif typeQ == "Objective":
+            if any(arg == "" or arg == 0 for ind,arg in enumerate(args) if ind!=3 and ind!=5):
+                mg.showerror("Text Field Blank Error",
+                            "Please enter number of Objective Question required.")
+                return
+            if args[2] > (noOfQuestFound_ObjFile):  
+                mg.showerror("Question Deficit Error",
+                            "Number of Question required exceeded Number of Question provided.")
+                return
+            OutDoc.add_heading(f"Group A :Multilpe Choice Question {NO_QUESTION_OBJ.get()}x1={NO_QUESTION_OBJ.get()}",2)
+            OBJ_QUES(NO_QUESTION_OBJ.get())
+        #When both subjective and objective 
+        elif typeQ == "Subjective and Objective":
+            if any(arg == "" or arg == 0 for arg in args):
+                mg.showerror("Text Field Blank Error",
+                            "Required Information must be provided.")
+                return
+            if args[2] > (noOfQuestFound_ObjFile) or args[3] > (noOfQuestFound_SubFile):  
+                mg.showerror("Question Deficit Error",
+                            "Number of Question required exceeded Number of Question provided.")
+                return
+            OutDoc.add_heading(f"Group A :Multilpe Choice Question {NO_QUESTION_OBJ.get()}x1={NO_QUESTION_OBJ.get()}",2)
+            OBJ_QUES(NO_QUESTION_OBJ.get())
+            OutDoc.add_heading(f"Group B",2)
+            SUB_QUES(NO_QUESTION_SUB.get())
+        else:
+            mg.showerror("TYPE SELECTION ERROR",
+                        "TYPE SELECTED IS NOT RECOGNIZED.")
             # saves every new file as in instances
         OutDoc.save(path.join(outPathSendable, f"Doc{papNo}.doc"))
-    
-    mg.showinfo("Completion of Task","Successfully Created File in"+outPathSendable)
-        
 
-# creates a new window
+    mg.showinfo("Completion of Task",
+                "Successfully Created File in"+outPathSendable)
+
+# CREATES A NEW WINDOW
 window = Tk()
-
+# setting window name
 window.title("DeQuestify")
 # no_of question required
-NO_QUESTION = IntVar()
+NO_QUESTION_OBJ = IntVar()
+NO_QUESTION_SUB = IntVar()
 # no of paper required
 NO_PAPER_REQUIRED = IntVar()
+OPTION_VAR = StringVar()
 # sets geometry of window
 window.geometry(f"1000x{height-90}+{(width//2)-500}+5")
 window.configure(bg="#363740")
-
-
+# creating a blackish color canvas
 canvas = Canvas(
     window,
     bg="#363740",
@@ -160,8 +275,8 @@ canvas = Canvas(
     highlightthickness=0,
     relief="ridge"
 )
-
 canvas.place(x=0, y=0)
+# creating main frame
 canvas.create_rectangle(
     195.0,
     15.0,
@@ -170,51 +285,51 @@ canvas.create_rectangle(
     fill="#FFFFFF",
     outline="")
 
-# Generate Button
-button_image_1 = PhotoImage(
+# CODE BLOCK STARTS -> SUBMISSION BUTTON PATH
+GenerateButton = PhotoImage(
     file=relative_to_assets("button_1.png"))
-button_1 = Button(
-    image=button_image_1,
+BtnGene = Button(
+    image=GenerateButton,
     borderwidth=0,
     highlightthickness=0,
     command=lambda: PROCESSOR(
-        inPathSendableObj, outPathSendable, NO_QUESTION.get(), NO_PAPER_REQUIRED.get()),
+        inPathSendableObj, outPathSendable,NO_QUESTION_OBJ.get(), NO_QUESTION_SUB.get(), NO_PAPER_REQUIRED.get(),inPathSendableSub),
     relief="flat"
 )
-button_1.place(
+BtnGene.place(
     x=437.0,
     y=555.0,
     width=126.0,
     height=48.0
 )
-# //////////////////////////////////////////////////////
-# entry 1 -> input file directory Objective
-entry_image_1 = PhotoImage(
+# CODE BLOCK ENDS -> SUBMISSION BUTTON
+# CODE BLOCK STARTS -> INPUT DIRECTROY OBJECTIIVE QUESTION PATH
+ImgObjFile = PhotoImage(
     file=relative_to_assets("entry_1.png"))
 entry_bg_1 = canvas.create_image(
-    348.0,
-    311.0,
-    image=entry_image_1
+    328.0,
+    Y_CONST+51.0,
+    image=ImgObjFile
 )
-entry_1 = Entry(
+ObjFileSec = Entry(
     bd=0,
     bg="#FCFDFE",
     fg="#000716",
     highlightthickness=0,
 
 )
-entry_1.place(
-    x=247.0,
-    y=253.0,
+ObjFileSec.place(
+    x=227.0,
+    y=Y_CONST+33.0,
     width=150.0,
     height=35.0
 )
-entry_1.insert(0, inPathSendableObj)
-entry_1.xview_moveto(1)
+ObjFileSec.insert(0, inPathSendableObj)
+ObjFileSec.xview_moveto(1)
 
-path_picker_img = PhotoImage(file=ASSETS_PATH / "path_picker.png")
+PathPickerObj = PhotoImage(file=ASSETS_PATH / "path_picker.png")
 path_picker_button = Button(
-    image=path_picker_img,
+    image=PathPickerObj,
     text='',
     compound='center',
     fg='white',
@@ -223,176 +338,212 @@ path_picker_button = Button(
     command=lambda: pathSelect(1),
     relief='flat')
 path_picker_button.place(
-    x=420, y=259,
+    x=400, y=Y_CONST+39,
     width=24,
     height=22)
 
 canvas.create_text(
-    239.0,
-    265.0,
+    209.0,
+    Y_CONST+5.0,
     anchor="nw",
     text="INPUT DIRECTORY (OBJECTIVE)",
     fill="#565863",
-    font=("Mulish Bold", 12 * -1)
+    font=("Mulish Bold", 14 * -1)
 )
 
-# entry 3 -> input file directory for Subjective Question
-entry_image_3 = PhotoImage(
+# CODE BLOCK ENDS -> INPUT DIRECTORY PATH FOR SUBJECTIVE QUESTION
+PathPickerSub = PhotoImage(file=ASSETS_PATH / "path_picker.png")
+path_picker_button = Button(
+    image=PathPickerSub,
+    text='',
+    compound='center',
+    fg='white',
+    borderwidth=0,
+    highlightthickness=0,
+    command=lambda: pathSelect(2),
+    relief='flat')
+path_picker_button.place(
+    x=400, y=Y_CONST+124,
+    width=24,
+    height=22)
+ImgEntrySub = PhotoImage(
     file=relative_to_assets("entry_1.png"))
 entry_bg_3 = canvas.create_image(
-    348.0,
-    311.0,
-    image=entry_image_3
+    328.0,
+    Y_CONST+136.0,
+    image=ImgEntrySub
 )
-entry_3 = Entry(
+SubFileSec = Entry(
     bd=0,
     bg="#FCFDFE",
     fg="#000716",
     highlightthickness=0,
 
 )
-entry_3.place(
-    x=247.0,
-    y=293.0,
+SubFileSec.place(
+    x=227.0,
+    y=Y_CONST+118.0,
     width=150.0,
     height=35.0
 )
-entry_3.insert(0, inPathSendableObj)
-entry_3.xview_moveto(1)
+SubFileSec.insert(0, inPathSendableSub)
+SubFileSec.xview_moveto(1)
 
-
-
-# entry_2 -> output directory
-entry_image_2 = PhotoImage(
-    file=relative_to_assets("entry_2.png"))
-entry_bg_2 = canvas.create_image(
-    348.0,
-    413.0,
-    image=entry_image_2
+canvas.create_text(
+    209.0,
+    Y_CONST+90.0,
+    anchor="nw",
+    text="INPUT DIRECTORY (Subjective)",
+    fill="#565863",
+    font=("Mulish Bold", 14 * -1)
 )
-entry_2 = Entry(
+# CODE BLOCK ENDS -> INPUT DIRECTORY PATH
+# CODE BLOCK STARTS -> OUTPUT DIRECTORY PATH
+OutEntryImg = PhotoImage(
+    file=relative_to_assets("entry_1.png"))
+entry_bg_2 = canvas.create_image(
+    328.0,
+    Y_CONST+223.0,
+    image=OutEntryImg
+)
+OutEntry = Entry(
     bd=0,
     bg="#FCFDFE",
     fg="#000716",
     highlightthickness=0
 )
-entry_2.place(
-    x=247.0,
-    y=395.0,
+OutEntry.place(
+    x=227.0,
+    y=Y_CONST+205.0,
     width=150.0,
     height=35.0
 )
-entry_2.insert(0, outPathSendable)
-entry_2.xview_moveto(1)
+OutEntry.insert(0, outPathSendable)
+OutEntry.xview_moveto(1)
 
-path_picker_img2 = PhotoImage(file=ASSETS_PATH / "path_picker.png")
+OutPath_Picker = PhotoImage(file=ASSETS_PATH / "path_picker.png")
 path_picker_button2 = Button(
-    image=path_picker_img2,
+    image=OutPath_Picker,
     text='',
     compound='center',
     fg='white',
     borderwidth=0,
     highlightthickness=0,
     # executes when button is clicked
-    command=lambda: pathSelect(2),
+    command=lambda: pathSelect(3),
     relief='flat')
 path_picker_button2.place(
-    x=420, y=400,
+    x=400, y=Y_CONST+210,
     width=24,
     height=22)
-# /////////////////////////////////////////////////////////
+canvas.create_text(
+    209.0,
+    Y_CONST+175.0,
+    anchor="nw",
+    text="OUTPUT DIRECTORY",
+    fill="#44454D",
+    font=("Mulish Bold", 14 * -1)
+)
+# CODE BLOCK ENDS -> OUTPUT DIRECTORY PATH
 
-# entry_3->
-entry_image_3 = PhotoImage(
-    file=relative_to_assets("entry_3.png"))
+# CODE BLOCK START -> NO OF REQUIRED QUESTION OBJECTIVE
+ReqQuesObj_Img = PhotoImage(
+    file=relative_to_assets("entry_2.png"))
 entry_bg_3 = canvas.create_image(
     628.0,
-    312.0,
-    image=entry_image_3
+    Y_CONST+51.0,
+    image=ReqQuesObj_Img
 )
-entry_3 = Entry(
+ReqQuesEntryObj = Entry(
     bd=0,
     bg="#FCFDFE",
     fg="#000716",
     highlightthickness=0,
-    textvariable=NO_QUESTION
+    textvariable=NO_QUESTION_OBJ
 )
-entry_3.place(
+ReqQuesEntryObj.place(
     x=527.0,
-    y=295.0,
+    y=Y_CONST+33.0,
     width=202.0,
     height=35.0
 )
 
 canvas.create_text(
-    239.0,
-    370.0,
+    519.0,
+    Y_CONST+5.0,
     anchor="nw",
-    text="OUTPUT DIRECTORY",
-    fill="#44454D",
-    font=("Mulish Bold", 12 * -1)
+    text="REQUIRED QUESTIONS -> OBJECTIVE",
+    fill="#44454C",
+    font=("Mulish Bold", 14 * -1)
+)
+# CODE BLOCK END -> NO OF QUESTION REQUIRED OBJECTIVE
+# CODE BLOCK START -> NO OF REQUIRED QUESTION SUBJECTIVE
+ReqQuesSub_Img = PhotoImage(
+    file=relative_to_assets("entry_1.png"))
+entry_bg_3 = canvas.create_image(
+    628.0,
+    Y_CONST+136,
+    image=ReqQuesSub_Img
+)
+ReqQuesEntrySub = Entry(
+    bd=0,
+    bg="#FCFDFE",
+    fg="#000716",
+    highlightthickness=0,
+    textvariable=NO_QUESTION_SUB
+)
+ReqQuesEntrySub.place(
+    x=527.0,
+    y=Y_CONST+118,
+    width=202.0,
+    height=35.0
 )
 
 canvas.create_text(
     519.0,
-    265.0,
+    Y_CONST+90,
     anchor="nw",
-    text="REQUIRED QUESTIONS",
+    text="REQUIRED QUESTIONS -> SUBJECTIVE",
     fill="#44454C",
-    font=("Mulish Bold", 12 * -1)
+    font=("Mulish Bold", 14 * -1)
 )
-# canvas.create_text(
-#     528.0,
-#     100.0,
-#     anchor="nw",
-#     text="No of papers to be generated",
-#     fill="#4A4F6C",
-#     font=("Muli Regular", 14 * -1)
-# )
-# canvas.create_text(
-#     28.0,
-#     403.0,
-#     anchor="nw",
-#     text="File Path Goes Here",
-#     fill="#4A4F6C",
-#     font=("Muli Regular", 14 * -1)
-# )
-
-entry_image_4 = PhotoImage(
-    file=relative_to_assets("entry_4.png"))
+# CODE BLOCK END -> NO OF QUESTION REQUIRED SUBJECTIVE
+# CODE BLOCK START -> NO OF FILE OR NO OF PAPER
+NoPapReq = PhotoImage(
+    file=relative_to_assets("entry_2.png"))
 entry_bg_4 = canvas.create_image(
     628.0,
-    413.0,
-    image=entry_image_4
+    Y_CONST+223,
+    image=NoPapReq
 )
-entry_4 = Entry(
+NoReqPapEntry = Entry(
     bd=0,
     bg="#FCFDFE",
     fg="#000716",
     highlightthickness=0,
     textvariable=NO_PAPER_REQUIRED
 )
-entry_4.place(
+NoReqPapEntry.place(
     x=527.0,
-    y=395.0,
+    y=Y_CONST+205.0,
     width=202.0,
     height=35.0
 )
 
 canvas.create_text(
     519.0,
-    370.0,
+    Y_CONST+175,
     anchor="nw",
     text="No of papers",
     fill="#44454D",
-    font=("Mulish Bold", 12 * -1)
+    font=("Mulish Bold", 14 * -1)
 )
 
 
 # Logo
 canvas.create_text(
     288.0,
-    80.0,
+    40.0,
     anchor="nw",
     text="DeQuestify",
     fill="#A4A6B3",
@@ -403,14 +554,14 @@ image_image_1 = PhotoImage(
     file=relative_to_assets("image_1.png"))
 image_1 = canvas.create_image(
     258.0,
-    90.0,
+    50.0,
     image=image_image_1
 )
 
 # Admin Access Text--
 canvas.create_text(
     410.0,
-    124.0,
+    84.0,
     anchor="nw",
     text="Admin Access",
     fill="#252733",
@@ -418,22 +569,47 @@ canvas.create_text(
 )
 # Question Found Box-------
 canvas.create_rectangle(
-    407.0,
-    169.0,
-    575.0,
-    209.0,
+    303.5,
+    124.0,
+    472.0,
+    164.0,
     fill="#00B2FF",
     outline="")
+canvas.create_rectangle(
+    510.0,
+    124.0,
+    678.0,
+    164.0,
+    fill="#0258f7",
+    outline="")   
 # Question found Text
-chanagable = canvas.create_text(
-    427.0,
-    178.0,
-    tags="notext",
+changable1 = canvas.create_text(
+    327.0,
+    133.0,
+    tags="notext1",
     anchor="nw",
-    text=f"Question Found :{len(InDoc.paragraphs)//5}",
+    text=f"Question Found :{len(InDocObj.paragraphs)//5}",
     fill="#FFFFFF",
     font=("Muli SemiBold", 16 * -1)
 )
-
+changable2 = canvas.create_text(
+    527.0,
+    133.0,
+    tags="notext2",
+    anchor="nw",
+    text=f"Question Found :{len(InDocSub.paragraphs)}",
+    fill="#FFFFFF",
+    font=("Muli SemiBold", 16 * -1)
+)
+choices = ('Subjective', 'Objective', 'Subjective and Objective')
+OPTION_VAR.set('Type of Question to be Generated - Any One')
+# for selecting option
+optionSelect = Combobox(window, values=choices, textvariable=OPTION_VAR)
+optionSelect.config(width=40, font=("Arial", 14 * -1))
+optionSelect.place(x=333, y=482.5)
+if (typeQ=='Subjective'):optionSelect.current(0)
+elif (typeQ=="Objective"):optionSelect.current(1)
+else:optionSelect.current(2)
+    
 window.resizable(False, False)
 window.mainloop()
